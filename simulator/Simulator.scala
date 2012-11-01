@@ -38,13 +38,16 @@ object Simulator extends App {
   // using the equirectangular projection because the distances are
   // likely to be small and the math is easier. This produces distance
   // in meters.
-  // TODO: This is very wrong.
   def calcDistance(src: Source, sen: Sensor): Double = (src, sen) match {
-    // TODO: Braces required here?
-    case (Source(src_lat, src_lon, _), Sensor(sen_lat, sen_lon)) => {
-      val x = (sen_lon - src_lon) * cos((sen_lat + src_lat)/2)
-      val y = src_lat - sen_lat
+    case (Source(src_lat, src_lon, _), Sensor(sen_lat, sen_lon)) =>
+      val src_lat_rad = deg2rad(src_lat)
+      val src_lon_rad = deg2rad(src_lon)
+      val sen_lat_rad = deg2rad(sen_lat)
+      val sen_lon_rad = deg2rad(sen_lon)
+      val x = (src_lon_rad - sen_lon_rad) * cos((src_lat_rad + sen_lat_rad)/2)
+      val y = src_lat_rad - sen_lat_rad
       sqrt(pow(x,2) + pow(y,2)) * radius
-    }
   }
+
+  def deg2rad(deg: Double): Double = deg * Pi/180
 }

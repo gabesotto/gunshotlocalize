@@ -1,47 +1,15 @@
-import scala.collection.immutable.Vector
-import scala.collection.JavaConverters._
+package simulator
+
 import scala.math._
-import java.lang.Integer
 
-import com.typesafe.config.ConfigFactory
-import com.typesafe.config.ConfigList
-
-case class Sensor(lat: Double, lon: Double)
-case class Source(lat: Double, lon: Double, amp: Double)
-case class SensorResult(distance: Double, delay: Double, amp: Double)
+import simulator.config.Config
+import simulator.types._
 
 object Simulation extends App {
-  val config = ConfigFactory.load("simulation.conf")
+  val speedOfSound = Config.speedOfSound
+  val radius = Config.radius
 
-  // Speed of Sound (m/s)
-  // TODO: Get from config.
-  val speedOfSound = 343.2
-
-  // Radius of the Earth (m)
-  // TODO: Get from config.
-  val radius = 6371000
-
-  // Should multiple sources be allowed?
-  val sources = config.getList("sources").asScala.toList map {x =>
-    val y = x.unwrapped().asInstanceOf[java.util.HashMap[String, Double]]
-    val lat = y.get("lat")
-    val lon = y.get("lon")
-    val amp = y.get("amp")
-    Source(lat, lon, amp)
-  }
-  val sensors = config.getList("sensors").asScala.toList map {x =>
-    val y = x.unwrapped().asInstanceOf[java.util.HashMap[String, Double]]
-    val lat = y.get("lat")
-    val lon = y.get("lon")
-    Sensor(lat, lon)
-  }
-
-  // This will allow for multiple sensors, but probably not in the
-  // correct way. In order for multiple sources to be modeled corectly,
-  // we must introduce the notion of when the source occurs.
-  // TODO: Would this look better if translated into map/flapMap calls?
-  val results = for (source <- sources;
-                     sensor <- sensors) yield doCalculation(source, sensor)
+  val results = Config.sensors map (doCalculation(Config.source, _))
   println(results)
 
   def doCalculation(source: Source, sensor: Sensor): SensorResult = {

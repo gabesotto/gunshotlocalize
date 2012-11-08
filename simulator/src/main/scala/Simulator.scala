@@ -29,21 +29,22 @@ object Simulation extends App {
     val amp = y.get("amp").toDouble
     Source(lat, lon, amp)
   }
-  //println(sources)
   val sensors = config.getList("sensors").asScala.toList map {x =>
     val y = x.unwrapped().asInstanceOf[java.util.HashMap[String, Integer]]
     val lat = y.get("lat").toDouble
     val lon = y.get("lon").toDouble
     Sensor(lat, lon)
   }
-  //println(sensors)
 
-  val source = sources.head
-
-  val results = sensors.map(doCalculation _)
+  // This will allow for multiple sensors, but probably not in the
+  // correct way. In order for multiple sources to be modeled corectly,
+  // we must introduce the notion of when the source occurs.
+  // TODO: Would this look better if translated into map/flapMap calls?
+  val results = for (source <- sources;
+                     sensor <- sensors) yield doCalculation(source, sensor)
   println(results)
 
-  def doCalculation(sensor: Sensor): SensorResult = {
+  def doCalculation(source: Source, sensor: Sensor): SensorResult = {
     val distance = calcDistance(source, sensor);
     val time = distance / speedOfSound
     val amp = source.amp * exp(-1.32 * distance)

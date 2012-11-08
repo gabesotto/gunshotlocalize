@@ -2,21 +2,33 @@ package simulator
 
 import scala.math._
 
+import java.net._
+
 import simulator.config.Config
 import simulator.types._
 
 object Simulation extends App {
+
   val speedOfSound = Config.speedOfSound
   val radius = Config.radius
 
   val results = Config.sensors map (doCalculation(Config.source, _))
   println(results)
+  results map (sendData(_))
 
-  def doCalculation(source: Source, sensor: Sensor): SensorResult = {
+  def doCalculation(source: Source, sensor: Sensor): SensorData = {
     val distance = calcDistance(source, sensor);
     val time = distance / speedOfSound
-    val amp = source.amp * exp(-1.32 * distance)
-    SensorResult(distance, time, amp)
+    //val amp = source.amp * exp(-1.32 * distance)
+    //SensorResult(distance, time, amp)
+    SensorData(sensor.lat, sensor.lon, time)
+  }
+
+  def sendData(res: SensorData): Unit = {
+    // TODO: Handle exceptions.
+    val socket = new Socket("localhost", 8080)
+    socket.getOutputStream().write(SensorData.toBytes(res))
+    socket.close()
   }
 
   // Calculate the distance between two (lat,lon) points. This is done

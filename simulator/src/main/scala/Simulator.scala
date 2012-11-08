@@ -1,28 +1,44 @@
 import scala.collection.immutable.Vector
+import scala.collection.JavaConverters._
 import scala.math._
+import java.lang.Integer
 
-// TODO: Is this really the way it works?
-abstract class Point(lat: Double, lon: Double)
-case class Sensor(lat: Double, lon: Double) extends Point(lat, lon)
-case class Source(lat: Double, lon: Double, amp: Double) extends Point(lat, lon)
+import com.typesafe.config.ConfigFactory
+import com.typesafe.config.ConfigList
 
-case class SensorResult(distance: Double, delay: Double, amplitude: Double)
+case class Sensor(lat: Double, lon: Double)
+case class Source(lat: Double, lon: Double, amp: Double)
+case class SensorResult(distance: Double, delay: Double, amp: Double)
 
-object Simulator extends App {
-  // TODO: Do IO stuff to get the information.
+object Simulation extends App {
+  val config = ConfigFactory.load("simulation.conf")
 
   // Speed of Sound (m/s)
+  // TODO: Get from config.
   val speedOfSound = 343.2
 
   // Radius of the Earth (m)
-  // TODO: Check value.
+  // TODO: Get from config.
   val radius = 6371000
 
-  // lat, lon, amplitude
-  val source = Source(0, 0, 0)
+  // Should multiple sources be allowed?
+  val sources = config.getList("sources").asScala.toList map {x =>
+    val y = x.unwrapped().asInstanceOf[java.util.HashMap[String, Integer]]
+    val lat = y.get("lat").toDouble
+    val lon = y.get("lon").toDouble
+    val amp = y.get("amp").toDouble
+    Source(lat, lon, amp)
+  }
+  //println(sources)
+  val sensors = config.getList("sensors").asScala.toList map {x =>
+    val y = x.unwrapped().asInstanceOf[java.util.HashMap[String, Integer]]
+    val lat = y.get("lat").toDouble
+    val lon = y.get("lon").toDouble
+    Sensor(lat, lon)
+  }
+  //println(sensors)
 
-  // To execute in parallel, add '.par' to the end of the line.
-  val sensors = Vector(Sensor(0, 0))
+  val source = sources.head
 
   val results = sensors.map(doCalculation _)
   println(results)

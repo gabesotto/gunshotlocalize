@@ -23,16 +23,16 @@ object Simulation extends App {
 
   // Should multiple sources be allowed?
   val sources = config.getList("sources").asScala.toList map {x =>
-    val y = x.unwrapped().asInstanceOf[java.util.HashMap[String, Integer]]
-    val lat = y.get("lat").toDouble
-    val lon = y.get("lon").toDouble
-    val amp = y.get("amp").toDouble
+    val y = x.unwrapped().asInstanceOf[java.util.HashMap[String, Double]]
+    val lat = y.get("lat")
+    val lon = y.get("lon")
+    val amp = y.get("amp")
     Source(lat, lon, amp)
   }
   val sensors = config.getList("sensors").asScala.toList map {x =>
-    val y = x.unwrapped().asInstanceOf[java.util.HashMap[String, Integer]]
-    val lat = y.get("lat").toDouble
-    val lon = y.get("lon").toDouble
+    val y = x.unwrapped().asInstanceOf[java.util.HashMap[String, Double]]
+    val lat = y.get("lat")
+    val lon = y.get("lon")
     Sensor(lat, lon)
   }
 

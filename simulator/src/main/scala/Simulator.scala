@@ -1,40 +1,24 @@
 package simulator
 
 import scala.math._
-
 import java.net._
 import java.io.IOException
-
 import simulator.config.Config
 import simulator.types._
 
 object Simulation extends App {
-
-  val speedOfSound = Config.speedOfSound
-  val radius = Config.radius
-
   val results = Config.sensors map (doCalculation(Config.source, _))
-  println(results)
+  // TODO: In the future, we would want to send data to the server as
+  // the sensors hear it. This could perhaps be done in two passes.
+  // In the first pass, the time delta is calculated. In the second
+  // pass, the sensors send their data to the server in order of their
+  // times.
   results map (sendData(_))
 
   def doCalculation(source: Source, sensor: Sensor): SensorData = {
     val distance = calcDistance(source, sensor);
-    val time = distance / speedOfSound
-    //val amp = source.amp * exp(-1.32 * distance)
-    //SensorResult(distance, time, amp)
+    val time = distance / Config.speedOfSound
     SensorData(sensor.lat, sensor.lon, time)
-  }
-
-  def sendData(res: SensorData): Unit = {
-    // TODO: Handle exceptions.
-    try {
-      val socket = new Socket("localhost", 8080)
-      socket.getOutputStream().write(SensorData.toBytes(res))
-      socket.close()
-    } catch {
-      case _: IOException =>
-        println("Problem creating the socket.")
-    }
   }
 
   // Calculate the distance between two (lat,lon) points. This is done
@@ -49,8 +33,19 @@ object Simulation extends App {
       val sen_lon_rad = deg2rad(sen_lon)
       val x = (src_lon_rad - sen_lon_rad) * cos((src_lat_rad + sen_lat_rad)/2)
       val y = src_lat_rad - sen_lat_rad
-      sqrt(pow(x,2) + pow(y,2)) * radius
+      sqrt(pow(x,2) + pow(y,2)) * Config.radius
   }
 
   def deg2rad(deg: Double): Double = deg * Pi/180
+
+  def sendData(res: SensorData): Unit = {
+    try {
+      val socket = new Socket("localhost", 8080)
+      socket.getOutputStream().write(SensorData.toBytes(res))
+      socket.close()
+    } catch {
+      case _: IOException =>
+        println("Problem communicating with server.")
+    }
+  }
 }

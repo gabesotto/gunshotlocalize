@@ -3,6 +3,7 @@ package simulator
 import scala.math._
 
 import java.net._
+import java.io.IOException
 
 import simulator.config.Config
 import simulator.types._
@@ -26,9 +27,14 @@ object Simulation extends App {
 
   def sendData(res: SensorData): Unit = {
     // TODO: Handle exceptions.
-    val socket = new Socket("localhost", 8080)
-    socket.getOutputStream().write(SensorData.toBytes(res))
-    socket.close()
+    try {
+      val socket = new Socket("localhost", 8080)
+      socket.getOutputStream().write(SensorData.toBytes(res))
+      socket.close()
+    } catch {
+      case _: IOException =>
+        println("Problem creating the socket.")
+    }
   }
 
   // Calculate the distance between two (lat,lon) points. This is done

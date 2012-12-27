@@ -21,10 +21,6 @@ object Simulation extends App {
     SensorData(sensor.lat, sensor.lon, time)
   }
 
-  // TODO: Is it bad to split up calcDistance this way?
-  // Could potentially use implicit conversions. However, for testing
-  // and reuse purposes, we want the base code to not rely on the
-  // extistence of Source and Sensor types.
   def calcDistance(src: Source, sen: Sensor): Double = (src, sen) match {
     case (Source(src_lat, src_lon, _), Sensor(sen_lat, sen_lon)) =>
       calcDistance((src_lat, src_lon), (sen_lat, sen_lon))
@@ -53,7 +49,7 @@ object Simulation extends App {
   def sendData(res: SensorData): Unit = {
     try {
       val socket = new Socket("localhost", 8080)
-      socket.getOutputStream().write(SensorData.toBytes(res))
+      socket.getOutputStream().write(res.toBytes)
       socket.close()
     } catch {
       case _: IOException =>

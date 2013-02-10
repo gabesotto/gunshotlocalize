@@ -5,7 +5,7 @@ import akka.actor._
 import java.net.InetSocketAddress
 import server.config._
 import server.types._
-//import server.localizer._
+import server.localizer._
 import com.mongodb.casbah.Imports._
 import com.mongodb.casbah.commons.conversions.scala._
 
@@ -49,6 +49,7 @@ class TCPServer(port: Int) extends Actor {
 
         // Record the detection to the database.
         // TODO: Do this better.
+        // TODO: Close the connection.
         val connection = MongoConnection("localhost", 27017)
         val collection = connection("gunshot")("detections")
         // TODO: Add indexes.
@@ -66,16 +67,16 @@ class TCPServer(port: Int) extends Actor {
         println(detections)
 
         // Check whether everything in the map is defined.
-        /*
         if (detections forall {case (_,v) => v.nonEmpty}) {
           // Spawn a child actor to do the localization.
           val localizer = context.actorOf(Props[Localizer])
-          localizer ! (detections.values map {x => x.get})
+          val d = detections.values map {x => x.get}
+          // TODO: Why do I have to convert this to a Seq?
+          localizer ! Detections(d.toSeq)
 
           // Reset  the detections.
           initMap()
         }
-        */
       }
   }
 
@@ -85,7 +86,6 @@ class TCPServer(port: Int) extends Actor {
   }
 }
 
-/*
 class Localizer extends Actor {
   def receive = {
     case Detections(s) =>
@@ -100,10 +100,9 @@ class Localizer extends Actor {
       // TODO: Do this with another actor?
       // TODO: What about the time of the event?
       // TODO: Get the host and port from a config file.
-      val host = "localhost"
-      val port = 27017
-      val connection = MongoConnection(host, port)
-      val collection = connection("test")("test")
+      // TODO: Close the connection.
+      val connection = MongoConnection("localhost", 27017)
+      val collection = connection("gunshot")("localizations")
       // TODO: How do you the geospatial indexing with Scala?
       collection.ensureIndex("loc")
       val builder = MongoDBObject.newBuilder
@@ -113,4 +112,3 @@ class Localizer extends Actor {
       collection += builder.result
   }
 }
-*/

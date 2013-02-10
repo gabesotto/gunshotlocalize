@@ -18,16 +18,15 @@ object Simulation extends App {
   def doCalculation(source: Source, sensor: Sensor): SensorData = {
     val distance = calcDistance(source, sensor);
     val time = distance / Config.speedOfSound
-    SensorData(sensor.lat, sensor.lon, time)
+    SensorData(sensor.id, sensor.lat, sensor.lon, time)
   }
 
   def calcDistance(src: Source, sen: Sensor): Double = (src, sen) match {
-    case (Source(src_lat, src_lon, _), Sensor(sen_lat, sen_lon)) =>
+    case (Source(src_lat, src_lon, _), Sensor(_, sen_lat, sen_lon)) =>
       calcDistance((src_lat, src_lon), (sen_lat, sen_lon))
   }
 
   // Where the first element is latitude, second in longitude.
-  // TODO: Should there be a datatype for this?
   type GeoPos = (Double, Double)
 
   // Calculate the distance between two (lat,lon) points. This is done

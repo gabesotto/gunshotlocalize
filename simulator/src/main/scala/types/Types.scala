@@ -2,19 +2,28 @@ package simulator.types
 
 import java.nio._
 
-case class Sensor(lat: Double, lon: Double)
+case class Sensor(id: Int, lat: Double, lon: Double)
 case class Source(lat: Double, lon: Double, amp: Double)
 
-case class SensorData(lat: Double, lon: Double, time: Double) {
+case class SensorData(id: Int, lat: Double, lon: Double, time: Double) {
   def toBytes(): Array[Byte] = {
-    // Allocate space for all the bytes at once
-    // Use double buffer
-    val lat_buf = ByteBuffer.allocate(8)
-    lat_buf.putDouble(lat)
-    val lon_buf = ByteBuffer.allocate(8)
-    lon_buf.putDouble(lon)
-    val time_buf = ByteBuffer.allocate(8)
-    time_buf.putDouble(time)
-    Array(lat_buf.array(), lon_buf.array(), time_buf.array()).flatten
+    /*
+     * Message layout:
+     * - message ID (byte)
+     * - sensor ID  (int)
+     * - latitude   (double)
+     * - longitude  (double)
+     * - time       (double)
+     * Total size is 29 bytes.
+     */
+    val message = ByteBuffer.allocate(29)
+
+    // Message ID is 0 for gunshot. The other values are unused.
+    message.put(0.toByte)
+    message.putInt(id)
+    message.putDouble(lat)
+    message.putDouble(lon)
+    message.putDouble(time)
+    message.array()
   }
 }

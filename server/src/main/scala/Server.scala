@@ -2,13 +2,12 @@ package server
 
 import scala.collection.mutable.Map
 import akka.actor._
-//import akka.pattern.ask
 import java.net.InetSocketAddress
 import server.config._
 import server.types._
 //import server.localizer._
-//import com.mongodb.casbah.Imports._
-//import com.mongodb.casbah.commons.conversions.scala._
+import com.mongodb.casbah.Imports._
+import com.mongodb.casbah.commons.conversions.scala._
 
 object Server extends App {
   val system = ActorSystem("Server")
@@ -45,8 +44,21 @@ class TCPServer(port: Int) extends Actor {
       val lon = buf.getDouble()
       val time = buf.getDouble()
 
+      // If the message ID is 0, the sensor has heard something.
       if (mid == 0) {
-        // We have a gunshot.
+
+        // Record the detection to the database.
+        // TODO: Do this better.
+        val connection = MongoConnection("localhost", 27017)
+        val collection = connection("gunshot")("detections")
+        // TODO: Add indexes.
+        // TODO: Add the server time.
+        val builder = MongoDBObject.newBuilder
+        builder += "id" -> sid
+        builder += "lat" -> lat
+        builder += "lon" -> lon
+        builder += "time" -> time
+        collection += builder.result
 
         // TODO: Need to change the simulator to send integers!
         val detection = Detection(sid, lat, lon, time)

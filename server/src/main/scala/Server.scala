@@ -19,21 +19,33 @@ object Server extends App {
 class TCPServer(port: Int) extends Actor {
   import IO._
 
-  // TODO: Map has a method "default" that could be overridden by
-  // a subclass such that it returns a promise if you ask it for
-  // a key that doesn't exist.
-  // TODO: Should the detections map be kept by a different actor?
+  /*
+   * This is a map from sensor IDs to an optional detection. If a sensor
+   * has not heard anything, the value for that sensor's ID is Nothing.
+   * If it has heard something, the value for that sensor's ID is a
+   * detection. (The detection is wrapped in a Some constructor.)
+   *
+   * TODO: Map has a method "default" that could be overridden by
+   * a subclass such that it returns a promise if you ask it for
+   * a key that doesn't exist.
+   * TODO: Should the detections map be kept by a different actor?
+   */
   val detections: Map[Int, Option[Detection]] = Map()
 
   override def preStart {
+    // Start listening for incoming TCP connections.
     IOManager(context.system).listen(new InetSocketAddress(port))
+
+    // Initialize the detections map.
     initMap()
   }
 
   def receive = {
     case NewClient(server) =>
+      // Someone has connected to the server.
       server.accept()
     case Read(handle, bytes) =>
+      // Read data from the connection.
       // TODO: Fire off a new actor to handle the data?
       // The new actor would need a way to access the detections map.
       val buf = bytes.toByteBuffer
@@ -49,7 +61,6 @@ class TCPServer(port: Int) extends Actor {
 
         // Record the detection to the database.
         // TODO: Do this better.
-        // TODO: Close the connection.
         val connection = MongoConnection("localhost", 27017)
         val collection = connection("gunshot")("detections")
         // TODO: Add indexes.
@@ -60,8 +71,10 @@ class TCPServer(port: Int) extends Actor {
         builder += "lon" -> lon
         builder += "time" -> time
         collection += builder.result
+        connection.close()
 
-        // TODO: Need to change the simulator to send integers!
+        // Create a detection object and store this in the map of sensor
+        // IDs to detections.
         val detection = Detection(sid, lat, lon, time)
         detections += (detection.id -> Some(detection))
         println(detections)
@@ -95,12 +108,9 @@ class Localizer extends Actor {
       println(localization)
 
       // Write to database.
-      // Can focus on getting this down well, then worry about the details
-      // of localizing.
       // TODO: Do this with another actor?
       // TODO: What about the time of the event?
       // TODO: Get the host and port from a config file.
-      // TODO: Close the connection.
       val connection = MongoConnection("localhost", 27017)
       val collection = connection("gunshot")("localizations")
       // TODO: How do you the geospatial indexing with Scala?
@@ -110,5 +120,6 @@ class Localizer extends Actor {
       builder += "loc" -> MongoDBObject("lat" -> localization.lat,
                                         "lon" -> localization.lon)
       collection += builder.result
+      connection.close()
   }
 }

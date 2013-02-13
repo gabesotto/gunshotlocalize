@@ -9,16 +9,29 @@ class FangLocalizer extends Localizer {
   // TODO: Should I just return new Detection objects instead?
   type LocTriplet = ((Double, Double), (Double, Double), (Double, Double))
 
+  // TODO: Instead of mapping and assigning variables, I can compose the
+  // functions for each step and carry along important information with
+  // the Reader monad.
+  //
+  // ex: val something = detections map (getTriplets compose getLocation)
   def localize(detections: Seq[Detection]): Localization = {
     // Break into triplets.
-    val triplets = for (x <- detections;
-                        y <- detections;
-                        z <- detections) yield (x, y, z)
+    // TODO: Get rid of the toSeq at the end. This forces the result into
+    // memory. As an iterator, the computation is done lazily, and will
+    // work out better if there are a large number of detectors.
+    // TODO: Need a good way to make each seq in the triplets seq into a
+    // 3-tuple. (Or change things to not use a 3-tuple.)
+    val triplets = detections.combinations(3).toSeq map (s => s match {
+      case Seq(a, b, c) => (a, b, c)
+    })
 
     // Get the position for each pair of pairs.
+    // This is done lazily (why?) so the result is a Stream.
+    // TODO: It might be worth using parallel collections here.
     val localizations = triplets map getLocation
 
     // Average the positions.
+    // TODO: Rewrite to handle an iterator.
     avgLocalization(localizations)
   }
 
@@ -29,7 +42,12 @@ class FangLocalizer extends Localizer {
       case (a: Double, b: Double) => (a*343, b*343)
     }
 
-    val coords = getCoordinates(t)
+    // TODO: Make this better. Maybe a job for the Reader monad?
+    val stuff = getCoordinates(t)
+    val coords = stuff._1
+    val theta = stuff._2
+    val delta_x = stuff._3
+    val delta_y = stuff._4
 
     // TODO: Why bother computing these? They will always be zero.
     val x1 = coords._1._1
@@ -53,10 +71,16 @@ class FangLocalizer extends Localizer {
     val y = g * x + h
 
     // TODO: Where does time come from?
+    // Could it be computed based on the localization and the distance from
+    // the sensors?
     val time = 0
 
+    val coords_0 = getOrigCoordinates(x, y, theta, delta_x, delta_y)
+    val x0 = coords_0._1
+    val y0 = coords_0._2
+
     // TODO: This needs to be turned into a lat/lon.
-    Localization(time, x, y)
+    Localization(time, x0, y0)
   }
 
   def avgLocalization(l: Seq[Localization]): Localization = {
@@ -65,8 +89,10 @@ class FangLocalizer extends Localizer {
     Localization(0, lats(0), lons(0))
   }
 
+  //def getTheta(x2: Double, xy: Double): Double = atan(y2/x2)
+
   // TODO: This could probably be done in a better way.
-  def getCoordinates(t: Triplet): LocTriplet = {
+  def getCoordinates(t: Triplet): (LocTriplet, Double, Double, Double) = {
     val delta_x = t._1.lon
     val delta_y = t._1.lat
 
@@ -86,12 +112,20 @@ class FangLocalizer extends Localizer {
     val x3r = x3 * cos(theta) + y3 * sin(theta)
     val y3r = -x3 * sin(theta) + y3 * cos(theta)
 
-    ((0, 0), (x2r, y2r), (x3r, y3r))
+    (((0, 0), (x2r, y2r), (x3r, y3r)), theta, delta_x, delta_y)
   }
 
   // TODO: Need access to the original theta and the original offsets.
-  def getOrigCoordinates(t: LocTriplet): LocTriplet = {
-    ???
+  def getOrigCoordinates(x: Double, y: Double, theta: Double, delta_x: Double, delta_y: Double): (Double, Double) = {
+    // First, undo the rotation.
+    val xr = x * cos(theta) - y * sin(theta)
+    val yr = x * sin(theta) + y * cos(theta)
+
+    // Then, undo the scaling.
+    val x0 = xr + delta_x
+    val y0 = yr + delta_y
+
+    (x0, y0)
   }
 
   // Compute the time difference of arrival between the sensors.
@@ -100,11 +134,13 @@ class FangLocalizer extends Localizer {
   def computeTODA(t: Triplet): (Double, Double) = {
     val d21 = (t._1, t._2) match {
       // TODO: absolute value?
-      case (d1: Detection, d2: Detection) => d1.time - d2.time
+      case (d1: Detection, d2: Detection) =>
+        d1.time - d2.time
     }
     val d31 = (t._1, t._3) match {
       // TODO: absolute value?
-      case (d1: Detection, d3: Detection) => d1.time - d3.time
+      case (d1: Detection, d3: Detection) =>
+        d1.time - d3.time
     }
 
     (d21, d31)
@@ -116,16 +152,12 @@ class FangLocalizer extends Localizer {
   // in meters.
   // TODO: This comes from the simulator code. They should be combined.
   def calcDistance(src: (Double, Double), sen: (Double, Double)): Double = {
-    val src_lat_rad = deg2rad(src._1)
-    val src_lon_rad = deg2rad(src._2)
-    val sen_lat_rad = deg2rad(sen._1)
-    val sen_lon_rad = deg2rad(sen._2)
+    val src_lat_rad = toRadians(src._1)
+    val src_lon_rad = toRadians(src._2)
+    val sen_lat_rad = toRadians(sen._1)
+    val sen_lon_rad = toRadians(sen._2)
     val x = (src_lon_rad - sen_lon_rad) * cos((src_lat_rad + sen_lat_rad)/2)
     val y = src_lat_rad - sen_lat_rad
     sqrt(pow(x,2) + pow(y,2)) * 6371000
   }
-
-  // TODO: This comes from the simulator code. They should be combined.
-  // TODO: The math library provides this function.
-  def deg2rad(deg: Double): Double = deg * Pi/180
 }

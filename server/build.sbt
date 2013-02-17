@@ -12,6 +12,6 @@ resolvers += "Sonatype" at "https://oss.sonatype.org/content/groups/scala-tools/
 
 resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
-libraryDependencies += "com.typesafe.akka" % "akka-actor_2.10.0-RC1" % "2.1.0-RC1"
+libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.1.0"
 
 libraryDependencies += "com.github.tmingos" % "casbah_2.10" % "2.5.0-SNAPSHOT"

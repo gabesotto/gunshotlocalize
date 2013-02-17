@@ -6,12 +6,16 @@ libraryDependencies <+= scalaVersion { v => compilerPlugin("org.scala-lang.plugi
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-P:continuations:enable")
 
-resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
+resolvers ++= Seq(
+  "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
+  "Sonatype"            at "https://oss.sonatype.org/content/groups/scala-tools/",
+  "Sonatype Snapshots"  at "https://oss.sonatype.org/content/repositories/snapshots/",
+  "spray repo"          at "http://repo.spray.io/"
+)
 
-resolvers += "Sonatype" at "https://oss.sonatype.org/content/groups/scala-tools/"
-
-resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
-
-libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.1.0"
-
-libraryDependencies += "com.github.tmingos" % "casbah_2.10" % "2.5.0-SNAPSHOT"
+libraryDependencies ++= Seq(
+  "com.typesafe.akka"  %% "akka-actor"     % "2.1.0",
+  "com.github.tmingos" %  "casbah_2.10"    % "2.5.0-SNAPSHOT",
+  "io.spray"           %  "spray-can"      % "1.1-M7",
+  "io.spray"           %   "spray-routing" % "1.1-M7"
+)

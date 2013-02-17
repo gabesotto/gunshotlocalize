@@ -1,0 +1,9 @@
+- Persistent TCP connections instead of connecting/disconnecting.
+- Every time a device connects, it sends its ID.
+- Server then listens to the connections for events.
+
+- messages:
+  - byte: ID (0 for gunshot, others not yet used)
+  - double: lat
+  - double: lon
+  - double: time (format TBD)

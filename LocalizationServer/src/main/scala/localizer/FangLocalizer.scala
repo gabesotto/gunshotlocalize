@@ -79,7 +79,6 @@ class FangLocalizer extends Localizer {
     val x0 = coords_0._1
     val y0 = coords_0._2
 
-    // TODO: This needs to be turned into a lat/lon.
     Localization(time, x0, y0)
   }
 

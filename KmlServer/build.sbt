@@ -6,7 +6,8 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.mongodb" %% "casbah"        % "2.5.0",
-  "io.spray"    %  "spray-can"     % "1.1-M7",
-  "io.spray"    %  "spray-routing" % "1.1-M7"
+  "com.typesafe.akka" %% "akka-actor"    % "2.1.0",
+  "org.mongodb"       %% "casbah"        % "2.5.0",
+  "io.spray"          %  "spray-can"     % "1.1-M7",
+  "io.spray"          %  "spray-routing" % "1.1-M7"
 )

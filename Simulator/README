@@ -1,0 +1,7 @@
+To run:
+sbt run
+
+Running this only makes sense if the server is already running.
+
+To run tests:
+sbt test

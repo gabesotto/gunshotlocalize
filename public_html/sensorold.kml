@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+    <Placemark>
+        <name> Sensor Range </name>
+        <Polygon>
+            <extrude>1</extrude>
+            <altitudeMode>relativeToGround</altitudeMode>
+            <outerBoundaryIs>
+                <LinearRing>
+                    <coordinates>
+                        -105.201, 40.0150,100
+                        -105.173, 40.0152,100
+                        -105.160, 40.0132,100
+                        -105.183, 40.0112,100
+                        -105.213, 40.0122,100
+                        -105.201, 40.0150,100
+                    </coordinates>
+                </LinearRing>
+            </outerBoundaryIs>
+        </Polygon>
+    </Placemark>
+</kml>

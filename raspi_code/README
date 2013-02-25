@@ -1,0 +1,7 @@
+Date: 02/25/2013
+Author: Erik E. Kahn
+
+This directory houses the code base for the Rasberry Pi client code. The code 
+is responsible for the detection of gunshots, and relaying the time & location
+that said gunshot was detected. Afterwords, the client resumes listening for
+ other gunshots, and the process repeats.

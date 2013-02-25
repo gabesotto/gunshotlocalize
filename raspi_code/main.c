@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <alsa/asoundlib.h> /* ALSA for reading from mic. w00t. */
 
 static snd_pcm_t *cap_handle;
@@ -18,12 +19,13 @@ static snd_pcm_hw_params_t *hw_params;
 
 void setup_mic()
 {
-	unsigned int sample_rate = 44100;
+	//TODO: Add error handling, becuase god knows something will eventually go wrong....
+	static unsigned int sample_rate = 44100;
 	snd_pcm_open(&cap_handle, "plughw:0,0", SND_PCM_STREAM_CAPTURE, 0);
 	snd_pcm_hw_params_malloc(&hw_params);
 
 	snd_pcm_hw_params_any(cap_handle, hw_params);
-	snd_pcm_hw_params_set_access(cap_handle, hw_params, SND_PCM_ACCESS_RW_NONINTERLEAVED); 
+	snd_pcm_hw_params_set_access(cap_handle, hw_params, SND_PCM_ACCESS_RW_INTERLEAVED); 
 	/* Other PCM formats exist. Could use floating point (-1,1) w/ 
     * SND_PCM_FORMAT_FLOAT_LE. You know, just an idea.
     */
@@ -39,8 +41,17 @@ void setup_mic()
 
 int main(int argc, char **argv)
 {
+	static int16_t buffer[1024]; // Samples are 16-bit signed integers :D
+
+	memset(buffer,(int16_t)7,1024*sizeof(int16_t));
 	setup_mic();
 
+	int read_count = snd_pcm_readi(cap_handle, buffer, 1024);
+
+	for (int i = 0; i < 128; ++i)
+		printf("%d, ", buffer[i]);
+	printf("\nI read %d frames.\n", read_count);
+	
 	snd_pcm_close(cap_handle);
 	return 0;
 }

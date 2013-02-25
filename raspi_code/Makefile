@@ -1,5 +1,5 @@
 LIBS = -lasound -lm
-FLAGS = -g -Wall
+FLAGS = -g -Wall -std=c99
 
 all: main.o
 	gcc $(FLAGS) main.o -o client $(LIBS)

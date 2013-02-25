@@ -26,9 +26,6 @@ void setup_mic()
 
 	snd_pcm_hw_params_any(cap_handle, hw_params);
 	snd_pcm_hw_params_set_access(cap_handle, hw_params, SND_PCM_ACCESS_RW_INTERLEAVED); 
-	/* Other PCM formats exist. Could use floating point (-1,1) w/ 
-    * SND_PCM_FORMAT_FLOAT_LE. You know, just an idea.
-    */
 	snd_pcm_hw_params_set_format(cap_handle, hw_params, SND_PCM_FORMAT_S16_LE); /* Signed 16-bit little endian */
 	snd_pcm_hw_params_set_rate_near(cap_handle, hw_params, &sample_rate, 0);
 	snd_pcm_hw_params_set_channels(cap_handle, hw_params, 1); /* Mono channel. No need for 2, silly. */
@@ -46,6 +43,10 @@ int main(int argc, char **argv)
 	memset(buffer,(int16_t)7,1024*sizeof(int16_t));
 	setup_mic();
 
+	/* NOTE: This function returns the number of frames actually read. Additionally,
+	 * should ALSA experience an overrun, it will return a number below 0. must call
+	 * the pcm_prepare function to clear out the buffer in order to continue recording
+	 * */
 	int read_count = snd_pcm_readi(cap_handle, buffer, 1024);
 
 	for (int i = 0; i < 128; ++i)

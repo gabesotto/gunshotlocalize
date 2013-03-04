@@ -15,10 +15,11 @@
 static snd_pcm_t *cap_handle;
 static snd_pcm_hw_params_t *hw_params;
 
+unsigned int sample_rate = 44100; // Not static as it may be needed later.
+
 void setup_mic()
 {
 	//TODO: Add error handling, becuase god knows something will eventually go wrong....
-	static unsigned int sample_rate = 44100;
 	snd_pcm_open(&cap_handle, "plughw:0,0", SND_PCM_STREAM_CAPTURE, 0);
 	snd_pcm_hw_params_malloc(&hw_params);
 
@@ -55,6 +56,9 @@ void test_func()
 	snd_pcm_close(cap_handle);
 }
 
+// TODO: Need to figure out how I want to determine a gunshot.
+
 void cleanup_mic()
 {
+	snd_pcm_close(cap_handle);
 }

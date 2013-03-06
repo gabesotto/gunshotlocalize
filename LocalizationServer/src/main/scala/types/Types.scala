@@ -7,12 +7,3 @@ case class Detections(d: Seq[Detection])
 
 // TODO: How should time be represented?
 case class Localization(time: Double, lat: Double, lon: Double)
-
-// TODO: Move elsewhere?
-// TODO: Trait or something else?
-/*
- * Container for information about coordinate transformation.
- * Used with a Reader monad.
- */
-trait CoordInfo {
-}

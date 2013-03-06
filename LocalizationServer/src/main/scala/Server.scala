@@ -112,12 +112,14 @@ class Localizer extends Actor {
       // TODO: Get the host and port from a config file.
       val connection = MongoConnection("localhost", 27017)
       val collection = connection("gunshot")("localizations")
-      // TODO: How do you the geospatial indexing with Scala?
-      collection.ensureIndex("loc")
+
+      // Geospatial indexing must start with longitude first.
+      collection.ensureIndex(MongoDBObject("loc" -> "2d"))
+
       val builder = MongoDBObject.newBuilder
       builder += "time" -> localization.time
-      builder += "loc" -> MongoDBObject("lat" -> localization.lat,
-                                        "lon" -> localization.lon)
+      builder += "loc" -> MongoDBObject("lon" -> localization.lon,
+                                        "lat" -> localization.lat)
       collection += builder.result
       connection.close()
   }

@@ -5,7 +5,7 @@ import akka.actor._
 import java.net.InetSocketAddress
 import server.config._
 import server.types._
-import server.localizer._
+import server.localizer.MyLocalizer
 import com.mongodb.casbah.Imports._
 import com.mongodb.casbah.commons.conversions.scala._
 
@@ -102,8 +102,7 @@ class TCPServer(port: Int) extends Actor {
 class Localizer extends Actor {
   def receive = {
     case Detections(s) =>
-      // TODO: Should this be a class or object?
-      val localizer = new FangLocalizer()
+      val localizer = new MyLocalizer()
       val localization = localizer.localize(s)
       println(localization)
 

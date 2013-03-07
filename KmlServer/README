@@ -1,0 +1,5 @@
+To run:
+sbt run
+
+This portion of the code is responsible for listening to REST API requests
+and responding with KML that will be used for the front-end map.

@@ -5,7 +5,7 @@ import akka.actor._
 import java.net.InetSocketAddress
 import server.config._
 import server.types._
-import server.localizer._
+import server.localizer.MyLocalizer
 import com.mongodb.casbah.Imports._
 import com.mongodb.casbah.commons.conversions.scala._
 
@@ -102,8 +102,7 @@ class TCPServer(port: Int) extends Actor {
 class Localizer extends Actor {
   def receive = {
     case Detections(s) =>
-      // TODO: Should this be a class or object?
-      val localizer = new FangLocalizer()
+      val localizer = new MyLocalizer()
       val localization = localizer.localize(s)
       println(localization)
 
@@ -113,12 +112,14 @@ class Localizer extends Actor {
       // TODO: Get the host and port from a config file.
       val connection = MongoConnection("localhost", 27017)
       val collection = connection("gunshot")("localizations")
-      // TODO: How do you the geospatial indexing with Scala?
-      collection.ensureIndex("loc")
+
+      // Geospatial indexing must start with longitude first.
+      collection.ensureIndex(MongoDBObject("loc" -> "2d"))
+
       val builder = MongoDBObject.newBuilder
       builder += "time" -> localization.time
-      builder += "loc" -> MongoDBObject("lat" -> localization.lat,
-                                        "lon" -> localization.lon)
+      builder += "loc" -> MongoDBObject("lon" -> localization.lon,
+                                        "lat" -> localization.lat)
       collection += builder.result
       connection.close()
   }

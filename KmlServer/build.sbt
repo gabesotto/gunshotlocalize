@@ -1,5 +1,7 @@
 scalaVersion := "2.10.0"
 
+scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature")
+
 resolvers ++= Seq(
   "Sonatype"   at "https://oss.sonatype.org/content/groups/scala-tools/",
   "spray repo" at "http://repo.spray.io/"

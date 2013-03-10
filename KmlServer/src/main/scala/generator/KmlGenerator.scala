@@ -1,32 +1,68 @@
 package kmlserver.generator
 
-import com.mongodb.casbah.Imports.DBObject
 import scala.xml.Node
 
+import kmlserver.database._
+
 object KmlGenerator {
-  implicit object MongoDbKmlGenerator extends KmlGenerator[Seq[DBObject]] {
-    def toKml(stuff: Seq[DBObject]): Node = {
-      // Can't do XML processing instructions.
-      //<?xml version="1.0" encoding="UTF-8"?>
-      // TODO: Add expiration tag.
-      <kml xmlns="http://www.opengis.net/kml/2.2">
-        {stuff map { obj  =>
-          <Placemark>
-            <name>Detection</name>
-            <Point>
-              <coordinates>{obj.get("lat")},{obj.get("lon")},0</coordinates>
-            </Point>
-          </Placemark>
-        }}
-      </kml>
+  def gunshotKml(p: Map[String, String])(implicit db: DatabaseQuerier) = {
+    val query = GunshotDatabaseQuery(
+      p.get("startDate"),
+      p.get("endDate"),
+      p.get("lat"),
+      p.get("lon"),
+      p.get("radius"),
+      p.get("count")
+    )
+    // TODO: What if it fails?
+    db.doQuery(query) match {
+      case Some(kmlData) => generateKml(kmlData)
     }
   }
 
-  def generateKml[T](t: T)(implicit gen: KmlGenerator[T]) = {
-    gen.toKml(t)
+  def sensorKml(p: Map[String, String])(implicit db: DatabaseQuerier) = {
+    val query = SensorDatabaseQuery(
+      p.get("lat"),
+      p.get("lon"),
+      p.get("radius")
+    )
+    // TODO: What if it fails?
+    db.doQuery(query) match {
+      case Some(kmlData) => generateKml(kmlData)
+    }
   }
-}
 
-trait KmlGenerator[T] {
-  def toKml(t: T): Node
+  def generateKml(k: KmlData) = {
+    // Can't do XML processing instructions.
+    //<?xml version="1.0" encoding="UTF-8"?>
+    // TODO: Add expiration tag.
+    // TODO: Add time of event.
+    <kml xmlns="http://www.opengis.net/kml/2.2">
+      <Document>
+        {k.data map { obj  =>
+          <Placemark>
+            <name>Detection</name>
+            <Point>
+              <coordinates>{obj.lon},{obj.lat},0</coordinates>
+            </Point>
+          </Placemark>
+        }}
+      </Document>
+    </kml>
+  }
+
+  // TODO: fix feature warning, implicitConversions
+  implicit def optstr2optdouble(i: Option[String]): Option[Double] = {
+    i map (_.toDouble)
+  }
+
+  // TODO: fix feature warning, implicitConversions
+  implicit def optstr2optint(i: Option[String]): Option[Int] = {
+    i map (_.toInt)
+  }
+
+  /*
+  implicit def optstr2optdate(i: Option[String]): Option[Something] = {
+  }
+  */
 }

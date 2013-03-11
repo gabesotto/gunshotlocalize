@@ -15,7 +15,7 @@
 static snd_pcm_t *cap_handle;
 static snd_pcm_hw_params_t *hw_params;
 
-unsigned int sample_rate = 44100; // Not static as it may be needed later.
+unsigned int sample_rate = 44100; // Not static as it may be needed in another module.
 
 void setup_mic()
 {
@@ -55,8 +55,6 @@ void test_func()
 
 	snd_pcm_close(cap_handle);
 }
-
-// TODO: Need to figure out how I want to determine a gunshot.
 
 void cleanup_mic()
 {

@@ -7,11 +7,11 @@
  */
 
 //TODO: These 4 should NOT be visible to other modules.
-void setup_mic();
+/*void setup_mic();
 void test_func();
 void listen();
 void cleanup_mic();
-
+*/
 // This function will create a new thread for exclusively monitoring the microphone. When
 // a gunshot is actually detected, the given callback will be called :)
 void listenForGunshots(void *callback);

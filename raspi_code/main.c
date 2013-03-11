@@ -27,6 +27,7 @@ int main(int argc, char **argv)
 {
 	if (argc < 2)
 	{
+		// TODO: Need to make it so we can use a fixed GPS position.
 		fprintf(stderr, "Usage: ./client <ip addr> <port> <GPS path>\n");
 		return 1;
 	}

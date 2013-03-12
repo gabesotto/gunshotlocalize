@@ -22,17 +22,33 @@
 #include "sampler.h"
 
 static unsigned short port;
+static char *config_file = "./CONFIG";
+
+/* This will actually be global, and used for debugging. */
+bool debug = false;
+
+void load_config()
+{
+	static char config_key[64],config_value[64];
+	FILE *f = fopen(config_file, "r");
+
+	if (!f)
+	{
+		fprintf(stderr, "Error: Couldn't find config file '%s'. Exiting...\n", config_file);
+		exit(1);
+	}
+
+	while ( fscanf(f, "%s = %s\n", config_key, config_value) == 2)
+		printf("%s is %s\n", config_key, config_value);
+
+
+
+	fclose(f);
+}
 
 int main(int argc, char **argv)
 {
-	if (argc < 2)
-	{
-		// TODO: Need to make it so we can use a fixed GPS position.
-		fprintf(stderr, "Usage: ./client <ip addr> <port> <GPS path>\n");
-		return 1;
-	}
-
-	if (argc > 2) port = atoi(argv[2]);
+	load_config();
 
 	return 0;
 }

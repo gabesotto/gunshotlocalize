@@ -1,4 +1,4 @@
-LIBS = -lasound -lm
+LIBS = -lasound -lm -lpthread
 FLAGS = -g -Wall -std=c99
 
 all: main.o loc.o sampler.o

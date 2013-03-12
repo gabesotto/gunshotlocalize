@@ -18,14 +18,21 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <pthread.h>
 #include "loc.h"
 #include "sampler.h"
 
-static unsigned short port;
+//static unsigned short port;
 static char *config_file = "./CONFIG";
 
 /* This will actually be global, and used for debugging. */
 bool debug = false;
+
+// This is a function that should be called from the gunshot listener. It is
+// only called upon the detection of a gunshot.
+void gunshot_handler()
+{
+}
 
 void load_config()
 {
@@ -39,7 +46,9 @@ void load_config()
 	}
 
 	while ( fscanf(f, "%s = %s\n", config_key, config_value) == 2)
+	{
 		printf("%s is %s\n", config_key, config_value);
+	}
 
 
 
@@ -48,7 +57,14 @@ void load_config()
 
 int main(int argc, char **argv)
 {
+	pthread_t thread;
+
+
 	load_config();
+
+	// No time to waste. Get cracking on listening to that gunshot.
+	pthread_create(&thread, NULL, &listenForGunshots, &gunshot_handler);
+	// TODO: Resume here.
 
 	return 0;
 }

@@ -34,7 +34,7 @@ void stopListening()
 	is_running = false;
 }
 
-void listenForGunshots(void (*callback)(void))
+void listenForGunshots(void *callback)
 {
 	int frames_read;
 	int fps; // frames per sample.
@@ -66,7 +66,7 @@ void listenForGunshots(void (*callback)(void))
 			if (diff < MIC_THRESH) continue;
 	
 			// Eeep! Gunshots! Better call the callback, he'll know what to do!
-			(*callback)();
+			(*((void (*)(void))callback))();
 	
 			break; // No need to check the remaining samples. Break the loop.
 		}

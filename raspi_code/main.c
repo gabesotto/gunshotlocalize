@@ -32,6 +32,7 @@ bool debug = false;
 // only called upon the detection of a gunshot.
 void gunshot_handler()
 {
+
 }
 
 void load_config()
@@ -61,10 +62,16 @@ int main(int argc, char **argv)
 
 
 	load_config();
-
 	// No time to waste. Get cracking on listening to that gunshot.
 	pthread_create(&thread, NULL, &listenForGunshots, &gunshot_handler);
-	// TODO: Resume here.
+
+	while (true)
+	{
+		// This code will be responsible for updating the GPS location. For now,
+		// just let the program keep running. The other thread will do the necesary
+		// magic tricks.
+		sleep(1);
+	}
 
 	return 0;
 }

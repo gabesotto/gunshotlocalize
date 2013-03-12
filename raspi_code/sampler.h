@@ -14,6 +14,5 @@ void stopListening();
 
 // Define recording interval of 1 millisecond.
 #define REC_INT ((float)1.0E-3)
-// Micrphone threshold should be 20% of the max range (0.20 * 2^16). We do 
-// 2^16 as we're using 16-bit samples. Duh. :)
-#define MIC_THRESH ((float)(1<<16) * 0.2f)
+// Microphone threshold. Was difference between two samples should constitute a kablewie?
+#define MIC_THRESH ((float)200.0f)

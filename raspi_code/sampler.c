@@ -45,6 +45,7 @@ void listenForGunshots(void *callback)
 	buffer = malloc(sizeof(int16_t) * fps);
 	memset(buffer, 0, fps*sizeof(int16_t));
 
+	
 	// Alright ALSA, do your magic.
 	setup_mic();
 

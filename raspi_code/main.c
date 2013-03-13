@@ -32,7 +32,8 @@ bool debug = false;
 // only called upon the detection of a gunshot.
 void gunshot_handler()
 {
-
+	// TODO: RESUME HERE
+	// Need to send results to chris. Make sure we have GPS coords.
 }
 
 void load_config()
@@ -60,6 +61,27 @@ int main(int argc, char **argv)
 {
 	pthread_t thread;
 
+
+	// Some good oll command line handling code. Ahhh, don't you just love it?
+	for (int i = 1; i < argc; ++i)
+	{
+		if (argv[i][0] == '-')
+		{
+			char flag = argv[i][1];
+			switch (flag)
+			{
+				case 'D':
+					printf("DEBUG: Debug mode active\n");
+					break;
+				default:
+					printf("Unknown flag '-%c', ignoring...\n", flag);
+					break;
+			}
+		}
+		else
+			printf("Garbage input '%s', ignoring....\n", argv[i]);
+	}
+	putchar('\n');
 
 	load_config();
 	// No time to waste. Get cracking on listening to that gunshot.

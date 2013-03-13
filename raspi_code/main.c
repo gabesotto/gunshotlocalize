@@ -8,7 +8,9 @@
  * heard within some small time period). 
  *
  * Usage:
- * ./client <ip addr> <port> <GPS path>
+ * ./client [-D]
+ * 
+ * Using the -D flag enters debug mode.
  *
  */
 
@@ -22,6 +24,8 @@
 #include "loc.h"
 #include "sampler.h"
 
+#define DEBUG_MSG(x) (printf("DEBUG: " x))
+
 //static unsigned short port;
 static char *config_file = "./CONFIG";
 
@@ -33,7 +37,8 @@ bool debug = false;
 void gunshot_handler()
 {
 	// TODO: RESUME HERE
-	// Need to send results to chris. Make sure we have GPS coords.
+	// Need to send results to chris. Make sure we have GPS coords. Don't forget
+	// to sleep for ~5 seconds. We don't want to pick up the same gunshot noise.
 }
 
 void load_config()
@@ -71,7 +76,8 @@ int main(int argc, char **argv)
 			switch (flag)
 			{
 				case 'D':
-					printf("DEBUG: Debug mode active\n");
+					DEBUG_MSG("Debug mode active\n");
+					debug = true;
 					break;
 				default:
 					printf("Unknown flag '-%c', ignoring...\n", flag);
@@ -83,7 +89,10 @@ int main(int argc, char **argv)
 	}
 	putchar('\n');
 
+	// And load the configuration file, or we aren't going to be doing much!
 	load_config();
+
+
 	// No time to waste. Get cracking on listening to that gunshot.
 	pthread_create(&thread, NULL, &listenForGunshots, &gunshot_handler);
 

@@ -77,6 +77,9 @@ void gunshot_handler()
 	gettimeofday(&tv, NULL);
 
 
+	// !!!! WARNING !!!!!
+	// This comes out to be a sizable number, enough that the accuracy of calculation
+	// MAY be compromised. Investigate closer.
 	cur_time = (double)tv.tv_sec + ((double)tv.tv_usec/(double)1.0E6);
 
 	*((double *)(&buffer[0])) = cur_time;
@@ -195,7 +198,8 @@ int main(int argc, char **argv)
 	// And load the configuration file, or we aren't going to be doing much!
 	load_config();
 
-	gunshot_handler();
+	//gunshot_handler();
+
 	// No time to waste. Get cracking on listening to that gunshot.
 	pthread_create(&thread, NULL, &listenForGunshots, &gunshot_handler);
 

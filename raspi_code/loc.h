@@ -13,5 +13,7 @@ typedef struct
 
 void init_gps(char *path);
 bool getCoordinate(gps_coord *result);
+// For when we really want to force things.
+void setCoordinate(gps_coord c);
 void cleanup_gps();
 

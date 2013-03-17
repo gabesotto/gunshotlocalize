@@ -12,7 +12,7 @@ import scala.math._
 // TODO: Better name.
 case class Something(x: Double, y: Double, t: Double)
 
-class MyLocalizer {
+class Localizer {
   // TODO: Stolen from simulator.
   type GeoPos = (Double, Double)
 
@@ -30,6 +30,9 @@ class MyLocalizer {
     localizeFourTuple(detections)
   }
 
+  // TODO: Localize using SVD to get the least-squares solution.
+  // Could also use QR decomp, which seems to be better.
+  // This way we can use all the data at once, not just limit it to four.
   def localizeFourTuple(d: Seq[Detection]): Localization = d match {
     case Seq(d0, d1, d2, d3) =>
       val d1_norm = normalize(d0, d1)
@@ -54,7 +57,9 @@ class MyLocalizer {
   def normalize(d0: Detection, dm: Detection): Something = {
     val x = cos(dm.lat)*(dm.lon - d0.lon)*(10e7/90)
     val y = (dm.lat - d0.lat)*(10e7/90)
-    Something(x, y, dm.time - d0.time)
+    //Something(x, y, dm.time - d0.time)
+    // Hack for attempting to increase accuracy.
+    Something(x, y, (sos*dm.time) - (sos*d0.time))
   }
 
   // TODO: Better name?
@@ -65,15 +70,23 @@ class MyLocalizer {
     (lat, lon)
   }
 
+  // TODO: Instead of subtracting the times and then multiplying, multiply
+  // and then subtract.
   def Am(d1: Something, dm: Something): Double = {
-    ((2*dm.x)/(sos*dm.t)) - ((2*d1.x)/(sos*d1.t))
+    //((2*dm.x)/(sos*dm.t)) - ((2*d1.x)/(sos*d1.t))
+    // Hack for attempting to increase accuracy.
+    ((2*dm.x)/(dm.t)) - ((2*d1.x)/(d1.t))
   }
 
   def Bm(d1: Something, dm: Something): Double = {
-    ((2*dm.y)/(sos*dm.t)) - ((2*d1.y)/(sos*d1.t))
+    // Hack for attempting to increase accuracy.
+    //((2*dm.y)/(sos*dm.t)) - ((2*d1.y)/(sos*d1.t))
+    ((2*dm.y)/(dm.t)) - ((2*d1.y)/(d1.t))
   }
 
   def Dm(d1: Something, dm: Something): Double = {
-    sos*dm.t - sos*d1.t - ((pow(dm.x,2)+pow(dm.y,2))/(sos*dm.t)) + ((pow(d1.x,2)+pow(d1.y,2))/(sos*d1.t))
+    // Hack for attempting to increase accuracy.
+    //sos*dm.t - sos*d1.t - ((pow(dm.x,2)+pow(dm.y,2))/(sos*dm.t)) + ((pow(d1.x,2)+pow(d1.y,2))/(sos*d1.t))
+    dm.t - d1.t - ((pow(dm.x,2)+pow(dm.y,2))/(dm.t)) + ((pow(d1.x,2)+pow(d1.y,2))/(d1.t))
   }
 }

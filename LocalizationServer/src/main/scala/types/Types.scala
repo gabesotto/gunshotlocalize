@@ -7,3 +7,5 @@ case class Detections(d: Seq[Detection])
 
 // TODO: How should time be represented?
 case class Localization(time: Double, lat: Double, lon: Double)
+
+case class DetectionData(b: akka.util.ByteString)

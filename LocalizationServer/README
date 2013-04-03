@@ -1,0 +1,5 @@
+To run:
+sbt run
+
+This portion of code is responsible for listening for information from the
+sensors and localizing events.
